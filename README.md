@@ -1,0 +1,1 @@
+![Health Check API Postman 실행 결과](images/HealthCheck-png.png)
