@@ -26,6 +26,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	//h2 추가
+	runtimeOnly 'com.h2database:h2'
+	//jpa 쿼리파라미터 확인
+	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:2.0.1'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 }
