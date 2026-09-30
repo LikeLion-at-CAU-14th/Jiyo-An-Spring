@@ -33,4 +33,21 @@ public class Orders extends BaseTimeEntity {
 
     @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL)
     private Coupon coupon;
+
+    @Embedded
+    private ShippingAddress shippingAddress; // 배송정보
+
+    private boolean deleted;
+
+    public void addProductOrders(ProductOrders productOrders) {
+        this.productOrders.add(productOrders);
+    }
+
+    public void updateShippingAddress(ShippingAddress shippingAddress) {
+        this.shippingAddress = shippingAddress;
+    }
+
+    public void softDelete() {
+        this.deleted = true;
+    }
 }

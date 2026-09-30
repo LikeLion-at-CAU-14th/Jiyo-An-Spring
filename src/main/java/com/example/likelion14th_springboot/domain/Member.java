@@ -6,7 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -17,11 +18,12 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
     private String name;
     private String address;
     private String email;
     private String phoneNumber;
-    private Integer age; // 회원 나이
+    private Integer age;
 
     @Builder
     public Member(String name, String address, String email, String phoneNumber,
@@ -47,14 +49,15 @@ public class Member {
     private Set<Product> products = new HashSet<>();
 
 
-    public void chargeDeposit(int money){
+    public void chargeDeposit(int money) {
         this.deposit += money;
     }
+
     public void useDeposit(int money) {
         this.deposit -= money;
     }
 
-    public String getName() {
-        return this.name;
+    public boolean isSeller() {
+        return Role.SELLER.equals(this.role);
     }
 }
