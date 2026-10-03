@@ -17,4 +17,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 이름이 prefix로 시작하는 회원만 조회 (LIKE 'prefix%')
     List<Member> findByNameStartingWithOrderByNameAsc(String prefix);
+
+    // 이름 중복 검사 쿼리
+    boolean existsByName(String name);
+
+    Optional<Member> findByName(String name);
 }
