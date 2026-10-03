@@ -18,8 +18,11 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Getter
     private String name;
+    private String password;
+
+    @Getter
+    //private String name;
     private String address;
     private String email;
     private String phoneNumber;
@@ -27,7 +30,7 @@ public class Member {
 
     @Builder
     public Member(String name, String address, String email, String phoneNumber,
-                  Integer age, Role role, Boolean isAdmin, Integer deposit) {
+                  Integer age, Role role, Boolean isAdmin, Integer deposit, String password) {
         this.name = name;
         this.address = address;
         this.email = email;
@@ -36,6 +39,7 @@ public class Member {
         this.role = role;
         this.isAdmin = isAdmin;
         this.deposit = deposit;
+        this.password = password;
     }
 
     @Enumerated(EnumType.STRING)
@@ -61,3 +65,4 @@ public class Member {
         return Role.SELLER.equals(this.role);
     }
 }
+

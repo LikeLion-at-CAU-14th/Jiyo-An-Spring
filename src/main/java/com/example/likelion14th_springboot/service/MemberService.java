@@ -1,12 +1,15 @@
 package com.example.likelion14th_springboot.service;
 
 import com.example.likelion14th_springboot.domain.Member;
+import com.example.likelion14th_springboot.dto.request.JoinRequestDto;
+import com.example.likelion14th_springboot.exception.DuplicateMemberException;
 import com.example.likelion14th_springboot.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,5 +52,21 @@ public class MemberService {
     // 이름이 prefix로 시작하는 회원만 조회
     public List<Member> getMembersByNamePrefix(String prefix) {
         return memberRepository.findByNameStartingWithOrderByNameAsc(prefix);
+    }
+
+    // 비밀번호 인코더 DI(생성자 주입)
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public void join(JoinRequestDto joinRequestDto) {
+        // 해당 name이 이미 존재하는 경우
+        if (memberRepository.existsByName(joinRequestDto.getName())) {
+            throw new DuplicateMemberException("이미 존재하는 사용자입니다.");
+        }
+
+        // 유저 객체 생성
+        Member member = joinRequestDto.toEntity(bCryptPasswordEncoder);
+
+        // 유저 정보 저장
+        memberRepository.save(member);
     }
 }
