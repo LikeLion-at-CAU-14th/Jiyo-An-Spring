@@ -1,10 +1,10 @@
 package com.example.likelion14th_springboot.config;
 
+import com.example.likelion14th_springboot.service.CustomOAuth2UserService;
 import com.example.likelion14th_springboot.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,6 +20,8 @@ import java.util.Collections;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private final CustomOAuth2UserService customOAuth2UserService;
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -48,14 +50,23 @@ public class SecurityConfig {
                 .cors((SecurityConfig::corsAllow)) // CORS 설정
                 .csrf(AbstractHttpConfigurer::disable) // 비활성화
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/join", "/login").permitAll() // 회원가입, 로그인은 모두 허용
-                        .requestMatchers("/**").authenticated()) // 나머지는 인증된 사용자만 허용
-                .formLogin(Customizer.withDefaults())//login
-                .logout(Customizer.withDefaults())//logout
+                        .requestMatchers("/join", "/login",
+                                "/oauth2/**", "/login/oauth2/**",
+                                "/h2-console/**", "/error").permitAll()
+                        .anyRequest().authenticated())
+//                .requestMatchers("/**").authenticated()) // 인증된 사용자만 허용
+                .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                )
+//            .formLogin(Customizer.withDefaults()) // login 설정
+//            .logout(Customizer.withDefaults()) // logout 설정
                 .userDetailsService(customUserDetailsService)
         ;
 
         return http.build();
     }
+
 
 }
