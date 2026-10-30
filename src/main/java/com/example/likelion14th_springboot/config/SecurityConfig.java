@@ -1,5 +1,6 @@
 package com.example.likelion14th_springboot.config;
 
+import com.example.likelion14th_springboot.global.config.OAuth2SuccessHandler;
 import com.example.likelion14th_springboot.jwt.JwtAuthenticationFilter;
 import com.example.likelion14th_springboot.service.CustomOAuth2UserService;
 import com.example.likelion14th_springboot.service.CustomUserDetailsService;
@@ -46,6 +47,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService; // UserDetailsService DI. 의존성 주입
     private final JwtAuthenticationFilter jwtFilter;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
     
 
     @Bean
@@ -64,6 +66,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
+                        .successHandler(oAuth2SuccessHandler)
                 )
 //            .formLogin(Customizer.withDefaults()) // login 설정
 //            .logout(Customizer.withDefaults()) // logout 설정
