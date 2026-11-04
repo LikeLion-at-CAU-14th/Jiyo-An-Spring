@@ -53,6 +53,18 @@ public class ProductService {
         return ProductResponseDto.fromEntity(product);
     }
 
+    // 3. 토큰의 사용자가 판매자인 상품 목록 가져오기
+    public List<ProductResponseDto> getMyProducts(String username) {
+        // 소셜 로그인 토큰에는 email, 일반 로그인 토큰에는 name이 들어있음
+        Member member = memberRepository.findByEmail(username)
+                .or(() -> memberRepository.findByName(username))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        return productRepository.findBySellerId(member.getId()).stream()
+                .map(ProductResponseDto::fromEntity)
+                .toList();
+    }
+
     // 상품 정보 업데이트
     @Transactional
     public ProductResponseDto updateProduct(Long productId, ProductUpdateRequestDto dto) {
