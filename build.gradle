@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+    runtimeOnly 'com.mysql:mysql-connector-j' // mysql 추가
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     compileOnly 'org.projectlombok:lombok'

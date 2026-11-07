@@ -1,9 +1,19 @@
 package com.example.likelion14th_springboot.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
+@RestController
+public class HealthCheckController {
+    @GetMapping("/api/health")
+    public String health() {
+        return "무야호~";
+    }
+}
+
+
+/*
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,4 +29,4 @@ public class HealthCheckController {
 
         return response;
     }
-}
+}*/
