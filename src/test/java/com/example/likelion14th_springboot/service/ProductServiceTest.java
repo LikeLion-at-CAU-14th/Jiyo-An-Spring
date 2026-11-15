@@ -118,6 +118,11 @@ class ProductServiceTest {
         assertThat(result.getPrice()).isEqualTo(5000);
     }
 
+
+    // =========================================================================
+    // 기존 코드를 BDD 스타일으로 교체
+    // =========================================================================
+
     @Test
     @DisplayName("본인의 상품을 성공적으로 수정할 수 있다.")
     void updateProduct_Success() {
@@ -145,6 +150,37 @@ class ProductServiceTest {
         assertThat(result.getPrice()).isEqualTo(2000);
         assertThat(product.getStock()).isEqualTo(20);
     }
+
+    @Test
+    @DisplayName("실패: 본인의 상품이 아니면 예외가 터져야 한다.")
+    void updateProduct_Fail_NotOwner() {
+        // Given
+        Long ownerId = 1L;
+        Long hackerId = 2L; // 남의 상품을 수정하려는 해커
+        Long productId = 100L;
+
+        Member owner = Member.builder().name("주인").build();
+        ReflectionTestUtils.setField(owner, "id", ownerId);
+
+        Member hacker = Member.builder().name("해커").build();
+        ReflectionTestUtils.setField(hacker, "id", hackerId);
+
+        Product mockProduct = Product.builder().seller(owner).build();
+
+        ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto();
+        ReflectionTestUtils.setField(requestDto, "memberId", hackerId); // 해커의 ID로 수정 요청
+
+        given(memberRepository.findById(hackerId)).willReturn(Optional.of(hacker));
+        given(productRepository.findById(productId)).willReturn(Optional.of(mockProduct));
+
+        // When & Then (예외 검증)
+        assertThatThrownBy(() -> productService.updateProduct(productId, requestDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("본인의 상품만 수정할 수 있습니다."); // 예외 메시지 확인
+    }
+
+    // =========================================================================
+
 
     @Test
     @DisplayName("본인이 등록한 상품을 성공적으로 삭제할 수 있다.")
