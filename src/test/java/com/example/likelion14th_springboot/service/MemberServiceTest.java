@@ -1,24 +1,33 @@
 package com.example.likelion14th_springboot.service;
 
 import com.example.likelion14th_springboot.domain.Member;
+import com.example.likelion14th_springboot.dto.request.JoinRequestDto;
 import com.example.likelion14th_springboot.enums.Role;
 import com.example.likelion14th_springboot.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestConstructor.AutowireMode;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 @TestConstructor(autowireMode = AutowireMode.ALL) // 생성자 주입용
@@ -36,8 +45,6 @@ public class MemberServiceTest {
     @BeforeEach
     void setUp() {
         // DB 모든 Member 데이터 삭제
-        // - 테스트 환경 (H2 등 인메모리 DB) : 사용 O
-        // - 실제 운영 (Production) DB : 사용 X
         memberRepository.deleteAll();
 
         IntStream.rangeClosed(1, 30).forEach(i -> {
@@ -45,7 +52,7 @@ public class MemberServiceTest {
                     .name("user" + i)
                     .email("user" + i + "@test.com")
                     .address("서울시 테스트동 " + i + "번지")
-                    .phoneNumber("010-1234-56" + String.format("%02d", i))
+                    .phoneNumber("010-1234-5678" + String.format("%02d", i))
                     .age(10 + i) // user1~user9는 미성년(11~19), user10~user30은 성인(20~40)
                     .deposit(1000 * i)
                     .isAdmin(false)
@@ -122,5 +129,42 @@ public class MemberServiceTest {
                 .containsExactly("user10", "user11", "user12", "user13", "user14",
                         "user15", "user16", "user17", "user18", "user19");
         assertThat(page.getContent()).allMatch(member -> member.getAge() >= 20);
+    }
+
+    // 로그인 단위 테스트 (DB 연결 없이 Mockito로 테스트)
+    @ExtendWith(MockitoExtension.class)
+    static class LoginTest {
+
+        @InjectMocks
+        private MemberService memberService;
+
+        @Mock
+        private MemberRepository memberRepository;
+
+        @Mock
+        private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+        @Test
+        @DisplayName("비밀번호가 일치하지 않으면 로그인에 실패하고 null을 반환한다.")
+        void login_Fail_WrongPassword() {
+            // given
+            Member member = Member.builder()
+                    .name("user1")
+                    .password("encodedPassword")
+                    .build();
+
+            JoinRequestDto requestDto = new JoinRequestDto();
+            ReflectionTestUtils.setField(requestDto, "name", "user1");
+            ReflectionTestUtils.setField(requestDto, "password", "wrongPassword");
+
+            given(memberRepository.findByName("user1")).willReturn(Optional.of(member));
+            given(bCryptPasswordEncoder.matches("wrongPassword", "encodedPassword")).willReturn(false);
+
+            // when
+            Member result = memberService.login(requestDto);
+
+            // then
+            assertThat(result).isNull();
+        }
     }
 }
